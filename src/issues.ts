@@ -69,23 +69,27 @@ export const unassignIssues = async ({octokit, issues, owner, repo, message, lab
     const labels = (labelsToRemove || '').split(',');
 
     for (const label of labels) {
-      await octokit.rest.issues.removeLabel({
-        owner,
-        repo,
-        issue_number: issue.number,
-        name: label,
-      });
+      if (label.length > 0) {
+        await octokit.rest.issues.removeLabel({
+            owner,
+            repo,
+            issue_number: issue.number,
+            name: label,
+        });
+      }
     }
 
-    try {
-      await octokit.rest.issues.createComment({
-        body: message,
-        owner,
-        repo,
-        issue_number: issue.number,
-      });
-    } catch {
-      // For now, we don't care if comment creation was not successful (e.g. hitting rate limits).
+    if (message && message.length > 0) {
+      try {
+        await octokit.rest.issues.createComment({
+          body: message,
+          owner,
+          repo,
+          issue_number: issue.number,
+        });
+      } catch {
+        // For now, we don't care if comment creation was not successful (e.g. hitting rate limits).
+      }
     }
   }
 };
